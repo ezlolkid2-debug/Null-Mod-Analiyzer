@@ -310,8 +310,11 @@ function Start-Analysis {
     $searchPaths = @()
     if ($TargetPath -and (Test-Path $TargetPath)) { $searchPaths += $TargetPath }
     if ($SystemMinecraftDir -and (Test-Path $SystemMinecraftDir)) { $searchPaths += $SystemMinecraftDir }
-    $autoPaths = @("$env:APPDATA\.minecraft","$env:APPDATA\.fabric","$env:APPDATA\.quilt","$env:APPDATA\Badlion Client","$env:APPDATA\LunarClient","$env:APPDATA\Feather Client")
-    foreach ($ap in $autoPaths) { if (Test-Path $ap) { Write-Threat "OK" "Auto-detected: $ap"; $searchPaths += $ap } }
+    # Only auto-detect if user did NOT provide a path
+    if ($searchPaths.Count -eq 0) {
+        $autoPaths = @("$env:APPDATA\.minecraft","$env:APPDATA\.fabric","$env:APPDATA\.quilt","$env:APPDATA\Badlion Client","$env:APPDATA\LunarClient","$env:APPDATA\Feather Client")
+        foreach ($ap in $autoPaths) { if (Test-Path $ap) { Write-Threat "OK" "Auto-detected: $ap"; $searchPaths += $ap } }
+    }
     if ($searchPaths.Count -eq 0) {
         Write-Threat "HIGH" "No Minecraft directory found!"
         Write-Host "`n  Usage:" -ForegroundColor Yellow
