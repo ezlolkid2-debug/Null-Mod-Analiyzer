@@ -517,44 +517,21 @@ function Start-InteractiveMode {
 # ENTRY POINT
 # ================================================================
 
-if ($Interactive) {
-    Start-InteractiveMode
-} elseif ($ModPath -or $MinecraftDir) {
-    Write-Host $BANNER -ForegroundColor Cyan
+Write-Host $BANNER -ForegroundColor Cyan
+Write-Host ""
+
+if ($ModPath -or $MinecraftDir) {
     Start-Analysis -TargetPath $ModPath -SystemMinecraftDir $MinecraftDir
 } else {
-    Write-Host $BANNER -ForegroundColor Cyan
-    Write-Host "" -ForegroundColor White
-    Write-Host "    What would you like to scan?" -ForegroundColor Cyan
-    Write-Host "" -ForegroundColor White
-    Write-Host "    [1] Enter a custom directory path" -ForegroundColor White
-    Write-Host "    [2] Auto-detect Minecraft installation" -ForegroundColor White
-    Write-Host "    [3] Full interactive mode" -ForegroundColor White
-    Write-Host "" -ForegroundColor White
-    $choice = Read-Host "    Select [1-3]"
-
-    switch ($choice) {
-        "1" {
-            Write-Host ""
-            $userPath = Read-Host "    Enter the full path to scan (mods folder or .minecraft dir)"
-            if (Test-Path $userPath) {
-                Start-Analysis -TargetPath $userPath
-            } else {
-                Write-Threat "CRITICAL" "Path not found: $userPath"
-            }
-        }
-        "2" {
-            $defaults = @("$env:APPDATA\.minecraft\mods","$env:APPDATA\.minecraft","$env:APPDATA\Badlion Client\mods","$env:APPDATA\LunarClient\mods","$env:APPDATA\Feather Client\mods")
-            $found = $null
-            foreach ($dp in $defaults) { if (Test-Path $dp) { $found = $dp; break } }
-            if ($found) {
-                Write-Threat "OK" "Auto-detected: $found"
-                Start-Analysis -TargetPath $found
-            } else {
-                Write-Threat "CRITICAL" "Could not auto-detect Minecraft. Try option 1 instead."
-            }
-        }
-        "3" { Start-InteractiveMode }
-        default { Write-Threat "HIGH" "Invalid option. Try again." }
+    Write-Host "    Enter the directory to scan:" -ForegroundColor Cyan
+    Write-Host "    (e.g. C:\Users\YOU\AppData\Roaming\.minecraft\mods)" -ForegroundColor DarkGray
+    Write-Host ""
+    $scanPath = Read-Host "    Path"
+    if ($scanPath -and (Test-Path $scanPath)) {
+        Start-Analysis -TargetPath $scanPath
+    } elseif ($scanPath) {
+        Write-Threat "CRITICAL" "Path not found: $scanPath"
+    } else {
+        Write-Threat "HIGH" "No path entered."
     }
 }
